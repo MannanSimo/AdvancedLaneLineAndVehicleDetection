@@ -7,8 +7,8 @@ from abstract_image_processor import AbstractImageProcessor
 from line import Line
 
 
-XM_PER_PIXEL = 3.7 / 700  # meters per pixel in x dimension
-YM_PER_PIXEL = 30 / 720   # meters per pixel in y dimension
+XM_PER_PIXEL: float = 3.7 / 700  # meters per pixel in x dimension
+YM_PER_PIXEL: float = 30 / 720   # meters per pixel in y dimension
 
 
 class AdvancedLaneLineDetector(AbstractImageProcessor):
@@ -22,25 +22,24 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
             rvecs: int,
             tvecs: int,
             font=cv2.FONT_HERSHEY_COMPLEX):
-        """Contruct ALLD object."""
-        self._processed_frames = 0
-        self._ret = ret
-        self._mtx = mtx
-        self._dist = dist
-        self._rvecs = rvecs
-        self._tvecs = tvecs
-        self._font = font
-        self._yellow_hsv_th_min = np.array([0, 70, 70])
-        self._yellow_hsv_th_max = np.array([50, 255, 255])
-        self._line_lt = Line(buffer_len=time_window)
-        self._line_rt = Line(buffer_len=time_window)
+        """Constract ALLD object."""
+        self._processed_frames: int = 0
+        self._ret: int = ret
+        self._mtx: int = mtx
+        self._dist: int = dist
+        self._rvecs: int = rvecs
+        self._tvecs: int = tvecs
+        self._fontv = font
+        self._yellow_hsv_th_min: np.ndarray = np.array([0, 70, 70])
+        self._yellow_hsv_th_max: np.ndarray = np.array([50, 255, 255])
+        self._line_lt: Line = Line(buffer_len=time_window)
+        self._line_rt: Line = Line(buffer_len=time_window)
         self._img_undistorted = None
 
     @property
     def img_undistorted(self):
         """Return undistorted frame."""
         return self._img_undistorted
-    
 
     def _undistort(self, frame: np.ndarray, mtx, dist) -> np.ndarray:
         """Undistort a frame given camera matrix and distortion coefficients."""
@@ -166,12 +165,13 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
             self,
             birdeye_binary,
             line_lt,
-            line_rt, 
+            line_rt,
             margin=100):
         """
         Get polynomial coefficients for lane-lines detected in an binary image.
         This function starts from previously detected lane-lines to speed-up the search of lane-lines in the current frame.
         """
+        detected: bool = False
         height, width = birdeye_binary.shape
 
         left_fit_pixel = line_lt.last_fit_pixel
@@ -189,8 +189,15 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
             (nonzero_x > (right_fit_pixel[0] * (nonzero_y ** 2) + right_fit_pixel[1] * nonzero_y + right_fit_pixel[2] - margin)) &
             (nonzero_x < (right_fit_pixel[0] * (nonzero_y ** 2) + right_fit_pixel[1] * nonzero_y + right_fit_pixel[2] + margin)))
 
-        line_lt.all_x, line_lt.all_y = nonzero_x[left_lane_inds], nonzero_y[left_lane_inds]
-        line_rt.all_x, line_rt.all_y = nonzero_x[right_lane_inds], nonzero_y[right_lane_inds]
+        line_lt.all_x, line_lt.all_y = (
+            nonzero_x[left_lane_inds],
+            nonzero_y[left_lane_inds]
+        )
+
+        line_rt.all_x, line_rt.all_y = (
+            nonzero_x[right_lane_inds],
+            nonzero_y[right_lane_inds]
+        )
 
         detected = True
         if not list(line_lt.all_x) or not list(line_lt.all_y):
@@ -200,7 +207,10 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
         else:
             left_fit_pixel = np.polyfit(line_lt.all_y, line_lt.all_x, 2)
             left_fit_meter = np.polyfit(
-                line_lt.all_y * YM_PER_PIXEL, line_lt.all_x * XM_PER_PIXEL, 2)
+                line_lt.all_y * YM_PER_PIXEL,
+                line_lt.all_x * XM_PER_PIXEL,
+                2
+            )
 
         if not list(line_rt.all_x) or not list(line_rt.all_y):
             right_fit_pixel = line_rt.last_fit_pixel
@@ -209,7 +219,10 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
         else:
             right_fit_pixel = np.polyfit(line_rt.all_y, line_rt.all_x, 2)
             right_fit_meter = np.polyfit(
-                line_rt.all_y * YM_PER_PIXEL, line_rt.all_x * XM_PER_PIXEL, 2)
+                line_rt.all_y * YM_PER_PIXEL,
+                line_rt.all_x * XM_PER_PIXEL,
+                2
+            )
 
         line_lt.update_line(
             left_fit_pixel,
@@ -259,7 +272,7 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
             line_lt,
             line_rt,
             n_windows=9,
-            margin=100, 
+            margin=100,
             minpin=50):
         """
         Get polynomial coefficients for lane-lines detected in an binary image.
@@ -357,7 +370,8 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
 
             right_fit_meter = np.polyfit(
                 line_rt.all_y * YM_PER_PIXEL,
-                line_rt.all_x * XM_PER_PIXEL, 2
+                line_rt.all_x * XM_PER_PIXEL,
+                2
             )
 
         line_lt.update_line(
@@ -370,14 +384,6 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
             right_fit_meter,
             detected
         )
-        """
-        ploty = np.linspace(0, height - 1, height)
-        
-        left_fitx = left_fit_pixel[0] * ploty ** 2 + \
-            left_fit_pixel[1] * ploty + left_fit_pixel[2]
-        right_fitx = right_fit_pixel[0] * ploty ** 2 + \
-            right_fit_pixel[1] * ploty + right_fit_pixel[2]
-        """
 
         out_img[nonzero_y[left_lane_inds], nonzero_x[left_lane_inds]] = [255, 0, 0]
         out_img[nonzero_y[right_lane_inds], nonzero_x[right_lane_inds]] = [0, 0, 255]
@@ -403,7 +409,7 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
             offset_meter = -1
 
         return offset_meter
-    
+
     def _draw_back_onto_the_road(
             self,
             img_undistorted: np.ndarray,
@@ -485,7 +491,7 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
             mask,
             pt1=(0, 0),
             pt2=(w, thumb_h+2*off_y),
-            color=(0, 0, 0), 
+            color=(0, 0, 0),
             thickness=cv2.FILLED
         )
 
@@ -541,7 +547,7 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
 
         img_binary = self._binarize(self._img_undistorted)
 
-        img_birdeye, M, Minv = self._birdeye(img_binary)
+        img_birdeye, M, minv = self._birdeye(img_binary)
 
         if (
             self._processed_frames > 0 and
@@ -570,7 +576,7 @@ class AdvancedLaneLineDetector(AbstractImageProcessor):
 
         blend_on_road = self._draw_back_onto_the_road(
             self._img_undistorted,
-            Minv,
+            minv,
             self._line_lt,
             self._line_rt,
             keep_state

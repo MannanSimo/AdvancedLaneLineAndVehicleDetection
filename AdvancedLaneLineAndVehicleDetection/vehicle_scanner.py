@@ -15,7 +15,7 @@ from sklearn.utils import shuffle
 
 
 class VehicleScanner:
-    """Representation of Vehichle objects scanner."""
+    """Representation of Vehicle objects scanner."""
 
     def __init__(
         self,
@@ -54,7 +54,7 @@ class VehicleScanner:
         ]
 
     def _get_model(self, input_shape=(64, 64, 3)):
-        """Return Keras model and model name for FCNN."""
+        """Return Keras model and model's name for FCNN."""
         model = Sequential()
 
         model.add(
@@ -135,7 +135,7 @@ class VehicleScanner:
 
         hot_points = []
 
-        # Considering obtained labels as vehicles.
+        # Considering obtained labels as vehicles
         for vehicle_id in range(labels[1]):
             nz = (labels[0] == vehicle_id + 1).nonzero()
             nz_y = np.array(nz[0])
@@ -154,6 +154,7 @@ class VehicleScanner:
                 offset_x = (x - x_min) / span_x * self.detection_point_size
                 offset_y = (y - y_min) / span_y * self.detection_point_size
 
+                # ROI - region of interest
                 # Getting boundaries in ROI coordinates scale (multiplying by ratioW, ratioH)
                 top_left_x = int(round(x * ratio_w - offset_x, 0))
                 top_left_y = int(round(y * ratio_h - offset_y, 0))

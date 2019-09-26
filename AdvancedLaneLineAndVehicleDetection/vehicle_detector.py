@@ -1,4 +1,4 @@
-"""Provide entity to detect vehicles on a frame."""
+"""Provide entity to detect vehicle(s) on a frame."""
 
 import numpy as np
 import cv2

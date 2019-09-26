@@ -1,4 +1,4 @@
-"""Provide abtsraction for Lane Line object."""
+"""Provide abstraction for Lane Line object."""
 
 import collections
 
@@ -11,9 +11,9 @@ class Line:
     Y_EVAL = 0
 
     def __init__(self, buffer_len=10):
-        """Contruct Line object."""
+        """Contract Line object."""
         # flag to mark if the line was detected the last iteration
-        self.detected = False
+        self.detected: bool = False
 
         # polynomial coefficients fitted on the last iteration
         self.last_fit_pixel = None

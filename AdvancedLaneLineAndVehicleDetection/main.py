@@ -1,5 +1,5 @@
 """
-Provide camera calibration and exection of detectors instances.
+Provide camera calibration and execution of detectors instances.
 """
 
 import glob
@@ -14,12 +14,12 @@ from advanced_lane_line_detector import AdvancedLaneLineDetector
 from vehicle_detector import VehicleDetector
 
 
-TIME_WINDOW = 10  # results are averaged over this number of frames
+TIME_WINDOW: int = 10  # results are averaged over this number of frames
 
 
 def lazy_calibration(func):
     """Cache facility for calibration activities."""
-    calibration_cache = '../camera_calibration_data/calibration_data.pickle'
+    calibration_cache: str = '../camera_calibration_data/calibration_data.pickle'
 
     def wrapper(*args, **kwargs):
         if path.exists(calibration_cache):
@@ -39,8 +39,13 @@ def lazy_calibration(func):
 
 @lazy_calibration
 def calibrate_camera(calib_images_dir: str):
-    """
-    Calibrate the camera given a directory containing calibration chessboards.
+    """Calibrate the camera given a directory containing calibration chessboards.
+
+    Arguments:
+        calib_images_dir {str} -- path to the calibration images.
+
+    Returns:
+        [type] -- calculated calibration parameters.
     """
     err_msg = F'"{calib_images_dir}" must exist and contain calibration images.'
 
